@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="@string/options" />
+	<EditText android:layout_height="wrap_content"
+		android:layout_width="fill_parent" android:id="@+id/OptionsField"
+		android:text="-E -H  -N -k -p -w 1"></EditText>
+	<TextView android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="@string/urls" />
+	<EditText android:layout_height="wrap_content"
+		android:layout_width="fill_parent" android:id="@+id/UrlField"
+		android:text="google.com"></EditText>
+	<LinearLayout
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:layout_gravity="right"
+>		<Button android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:layout_gravity="right"
+			android:id="@+id/AboutButton" android:text="@string/about"></Button>
+		<Button android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:id="@+id/HelpButton"
+			android:layout_gravity="right" android:text="@string/help"></Button>
+		<Button android:id="@+id/engage" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:text="@string/engage"
+			android:clickable="true" android:layout_gravity="right"></Button>
+	</LinearLayout>
+
+
+
+	<ScrollView android:id="@+id/scrollview"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:layout_weight="1">
+		<TextView android:id="@+id/output" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" />
+	</ScrollView>
+
+
+
+
+</LinearLayout>

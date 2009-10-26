@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<style name="MyTheme">
+  <item name="android:textViewStyle">@style/Text</item>
+  <item name="android:windowNoTitle">true</item>
+</style>
+<style name="Text">
+  <item name="android:textSize">10dip</item>
+  <item name="android:typeface">monospace</item>
+</style>
+</resources>
