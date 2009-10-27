@@ -8,6 +8,7 @@
 <string name="options">Wget Flags:</string>
 <string name="help">Help</string>
 <string name="about">About</string>
+
 <string name="help_contents">
 GNU Wget 1.11.4, a non-interactive network retriever.
 Usage: wget [OPTION]... [URL]...
