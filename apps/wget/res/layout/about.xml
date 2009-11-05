@@ -20,7 +20,7 @@ This application is a thin wrapper around the C implementation of wget, which ha
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="
-After the first run, the wget binary is stored at /data/data/net.crud.Wget/wget.  You may run this from a terminal if you choose.  You may wish to symlink or copy it into /system/bin if you use it regularly, though this will require remounting the root filesystem read-write." />
+After the first run, the wget binary is stored at /data/data/net.crud.wget/wget.  You may run this from a terminal if you choose.  You may wish to symlink or copy it into /system/bin if you use it regularly, though this will require remounting the root filesystem read-write." />
 
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content"

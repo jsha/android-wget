@@ -1,4 +1,4 @@
-package net.crud.Wget;
+package net.crud.wget;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -90,7 +90,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	protected void killWget() {
 	    try {
 		    mCreateSubprocess.invoke(
-				   null, "/system/bin/kill", "-9", mPid, null);
+				   null, "/system/bin/sh", "-c", "kill -9 " + mPid, null);
 		    publishProgress("Killed by user");
 		// If we catch an exception trying to run kill, don't worry about it much.
 		// Wget will die on its own, eventually (probably)

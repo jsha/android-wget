@@ -1,4 +1,4 @@
-package net.crud.Wget;
+package net.crud.wget;
 
 import android.os.Bundle;
 import android.app.Activity;

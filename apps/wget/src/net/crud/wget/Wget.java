@@ -1,4 +1,4 @@
-package net.crud.Wget;
+package net.crud.wget;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import net.crud.Wget.R.id;
+import net.crud.wget.R;
 
 import android.app.Activity;
 import android.content.Context;
