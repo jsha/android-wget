@@ -45,7 +45,7 @@ public class Wget extends Activity {
 		EditText options_field = (EditText) findViewById(R.id.OptionsField);
 		options_field.setText(options);
 		
-		Button engage = (Button) findViewById(R.id.engage);
+		final Button engage = (Button) findViewById(R.id.engage);
 		engage.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				runWget();
@@ -53,11 +53,14 @@ public class Wget extends Activity {
 		});
 		
 
-		Button kill = (Button) findViewById(R.id.kill);
+		final Button kill = (Button) findViewById(R.id.kill);
 		kill.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (mWgetTask != null) {
 				  mWgetTask.killWget();
+				  kill.setVisibility(View.INVISIBLE);
+			      engage.setVisibility(View.VISIBLE);
+			        
 				}
 			}
 		});
@@ -119,6 +122,9 @@ public class Wget extends Activity {
 		
 		Button run = (Button) findViewById(R.id.engage);
 		Button kill = (Button) findViewById(R.id.kill);
+		run.setVisibility(View.INVISIBLE);
+        kill.setVisibility(View.VISIBLE);
+        
 		// This is an AsyncTask that executes the wget binary and copies stdout into 'tv'.
 		mWgetTask = new WgetTask(tv, sv, run, kill);
 		mWgetTask.execute(wget + " " + args);
