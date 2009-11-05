@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+	<ScrollView android:layout_width="fill_parent"
+		android:layout_height="wrap_content">
+		<LinearLayout android:orientation="vertical"
+			android:layout_width="fill_parent" android:layout_height="fill_parent">
+
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="
+This is a port of the GNU program wget to the Android platform.  Wget is a commandline tool that can recursively download whole sites or parts of them.  It can also be used to download a single web page with all of its constituent parts, useful for storing a page to view offline.  By default, files are saved to /sdcard/wget, though this can be changed with the '-P' option.  The default options provided are good defaults for downloading a single web page with all its parts." />
+
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="
+This application is a thin wrapper around the C implementation of wget, which has been compiled as a native application targeting the arm-android-eabi platform.  What this means in practical terms is that this application will *not* work on all Android devices.  In particular if your Android device does not have an ARM chip, this version of wget will not run.  Wget has been tested to run on a G1 and does work on that device." />
+
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="
+After the first run, the wget binary is stored at /data/data/net.crud.Wget/wget.  You may run this from a terminal if you choose.  You may wish to symlink or copy it into /system/bin if you use it regularly, though this will require remounting the root filesystem read-write." />
+
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="
+Wget is released under the GPL.  The source code for this application, including slightly-modified source for the original C program, is available at " />
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:text="http://hoffman-andrews.com/android/wget"
+				android:autoLink="web" />
+
+		</LinearLayout>
+	</ScrollView>
+
+</LinearLayout>

@@ -10,17 +10,26 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import android.os.AsyncTask;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class WgetTask extends AsyncTask<String, String, Boolean> {
-	TextView log_target;
-    ScrollView scroller;
+	TextView mLogTarget;
+    ScrollView mScroller;
+    Button mRunButton;
+    Button mKillButton;
+    int mPid;
+    Method mCreateSubprocess;
     
-	WgetTask(TextView tv, ScrollView sc) {
+	WgetTask(TextView tv, ScrollView sc, Button run, Button kill) {
 		tv.setText("");
-		log_target = tv;
-		scroller = sc;
+		mLogTarget = tv;
+		mScroller = sc;
+		mRunButton = run;
+		mKillButton = kill;
+		mPid = -1;
 	}
 
 	protected Boolean doInBackground(String... command) {
@@ -34,14 +43,19 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 
 			// Inspired by http://remotedroid.net/blog/2009/04/13/running-native-code-in-android/
 			Method createSubprocess = Class.forName("android.os.Exec").getMethod("createSubprocess",
-			String.class, String.class, String.class, int[].class);
+			  String.class, String.class, String.class, int[].class);
+			mCreateSubprocess = createSubprocess;
 			
 			// Executes the command.
 			// NOTE: createSubprocess() is asynchronous.
-			int[] pid = new int[1];
+			int[] pids = new int[1];
 			FileDescriptor fd = (FileDescriptor)createSubprocess.invoke(
-			   null, "/system/bin/sh", "-c", "cd " + working_dir + ";" + command[0], pid);
-			
+			   null, "/system/bin/sh", "-c", "cd " + working_dir + ";" + command[0], pids);
+	        mPid = pids[0];
+	        
+	        mRunButton.setVisibility(View.INVISIBLE);
+	        mKillButton.setVisibility(View.VISIBLE);
+	        
 			// Reads stdout.
 			// NOTE: You can write to stdin of the command using new FileOutputStream(fd).
 			FileInputStream in = new FileInputStream(fd);
@@ -72,13 +86,26 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 		} catch (InvocationTargetException e) {
 			throw new RuntimeException(e.getMessage());
 		}
-		
+		mRunButton.setVisibility(View.VISIBLE);
+        mKillButton.setVisibility(View.INVISIBLE);
+        
 		return true;
 	}
 
+	protected void killWget() {
+	    try {
+		    mCreateSubprocess.invoke(
+				   null, "/system/bin/sh", "-c", "kill " + mPid, null);
+		// If we catch an exception trying to run kill, don't worry about it much.
+		// Wget will die on its own, eventually (probably)
+	    } catch (IllegalArgumentException e) {
+		} catch (IllegalAccessException e) {
+		} catch (InvocationTargetException e) {
+		}
+	}
 	protected void onProgressUpdate(String... progress) {
-		this.log_target.append(progress[0]);
-		final ScrollView sc = this.scroller;
+		this.mLogTarget.append(progress[0]);
+		final ScrollView sc = this.mScroller;
 		// Put this on the UI thread queue so the text view re-renders before we try to scroll.
 		// Otherwise we fire too soon and there is no additional space to scroll to!
         sc.post(new Runnable() {

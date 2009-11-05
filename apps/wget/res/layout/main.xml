@@ -5,13 +5,11 @@
 	<TextView android:layout_width="wrap_content"
 		android:layout_height="wrap_content" android:text="@string/options" />
 	<EditText android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:id="@+id/OptionsField"
-		android:text="-E -H  -N -k -p -w 1"></EditText>
+		android:layout_width="fill_parent" android:id="@+id/OptionsField"></EditText>
 	<TextView android:layout_width="wrap_content"
 		android:layout_height="wrap_content" android:text="@string/urls" />
 	<EditText android:layout_height="wrap_content"
-		android:layout_width="fill_parent" android:id="@+id/UrlField"
-		android:text="google.com"></EditText>
+		android:layout_width="fill_parent" android:id="@+id/UrlField"></EditText>
 	<LinearLayout
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:layout_gravity="right"
@@ -23,8 +21,9 @@
 			android:layout_gravity="right" android:text="@string/help"></Button>
 		<Button android:id="@+id/engage" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:text="@string/engage"
-			android:clickable="true" android:layout_gravity="right"></Button>
-	</LinearLayout>
+			android:clickable="true" android:layout_gravity="right" android:visibility="visible"></Button>
+	<Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/kill" android:visibility="invisible" android:id="@+id/kill"></Button>
+</LinearLayout>
 
 
 
