@@ -48,9 +48,10 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 
 			// Executes the command.
 			// NOTE: createSubprocess() is asynchronous.
+            // 'exec' is key here, otherwise killing this pid will only kill the shell, and wget will go background. 
 			int[] pids = new int[1];
 			FileDescriptor fd = (FileDescriptor)createSubprocess.invoke(
-			   null, "/system/bin/sh", "-c", "cd " + working_dir + ";" + command[0], pids);
+			   null, "/system/bin/sh", "-c", "cd " + working_dir + "; exec " + command[0], pids);
 	        mPid = pids[0];
 	        
 			// Reads stdout.
@@ -89,9 +90,9 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	// Runs on UI thread
 	protected void killWget() {
 	    try {
-		    mCreateSubprocess.invoke(
-				   null, "/system/bin/sh", "-c", "kill -9 " + mPid, null);
-		    publishProgress("Killed by user");
+	    	mCreateSubprocess.invoke(null, "/system/bin/sh", "-c", "kill -2 " + mPid, null);
+			 
+			publishProgress("\n\nProcess " + mPid + " killed by user\n\n");
 		// If we catch an exception trying to run kill, don't worry about it much.
 		// Wget will die on its own, eventually (probably)
 	    } catch (IllegalArgumentException e) {
