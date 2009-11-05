@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import android.os.AsyncTask;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -22,13 +21,12 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
     Button mKillButton;
     int mPid;
     Method mCreateSubprocess;
+    Method mWaitFor;
     
 	WgetTask(TextView tv, ScrollView sc, Button run, Button kill) {
 		tv.setText("");
 		mLogTarget = tv;
 		mScroller = sc;
-		mRunButton = run;
-		mKillButton = kill;
 		mPid = -1;
 	}
 
@@ -42,19 +40,18 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 			dir.mkdir();
 
 			// Inspired by http://remotedroid.net/blog/2009/04/13/running-native-code-in-android/
-			Method createSubprocess = Class.forName("android.os.Exec").getMethod("createSubprocess",
+			Class<?> execClass = Class.forName("android.os.Exec");
+			Method createSubprocess = execClass.getMethod("createSubprocess",
 			  String.class, String.class, String.class, int[].class);
 			mCreateSubprocess = createSubprocess;
-			
+            mWaitFor = execClass.getMethod("waitFor", int.class);
+
 			// Executes the command.
 			// NOTE: createSubprocess() is asynchronous.
 			int[] pids = new int[1];
 			FileDescriptor fd = (FileDescriptor)createSubprocess.invoke(
 			   null, "/system/bin/sh", "-c", "cd " + working_dir + ";" + command[0], pids);
 	        mPid = pids[0];
-	        
-	        mRunButton.setVisibility(View.INVISIBLE);
-	        mKillButton.setVisibility(View.VISIBLE);
 	        
 			// Reads stdout.
 			// NOTE: You can write to stdin of the command using new FileOutputStream(fd).
@@ -86,16 +83,15 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 		} catch (InvocationTargetException e) {
 			throw new RuntimeException(e.getMessage());
 		}
-		mRunButton.setVisibility(View.VISIBLE);
-        mKillButton.setVisibility(View.INVISIBLE);
-        
 		return true;
 	}
 
+	// Runs on UI thread
 	protected void killWget() {
 	    try {
 		    mCreateSubprocess.invoke(
-				   null, "/system/bin/sh", "-c", "kill " + mPid, null);
+				   null, "/system/bin/kill", "-9", mPid, null);
+		    publishProgress("Killed by user");
 		// If we catch an exception trying to run kill, don't worry about it much.
 		// Wget will die on its own, eventually (probably)
 	    } catch (IllegalArgumentException e) {
