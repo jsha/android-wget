@@ -10,6 +10,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import android.os.AsyncTask;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -17,17 +19,18 @@ import android.widget.TextView;
 public class WgetTask extends AsyncTask<String, String, Boolean> {
 	TextView mLogTarget;
     ScrollView mScroller;
-    Button mRunButton;
-    Button mKillButton;
     int mPid;
     Method mCreateSubprocess;
-    Method mWaitFor;
+    Button mRunButton;
+    Button mKillButton;
     
-	WgetTask(TextView tv, ScrollView sc, Button run, Button kill) {
+	WgetTask(TextView tv, ScrollView sc, Button runButton, Button killButton) {
 		tv.setText("");
 		mLogTarget = tv;
 		mScroller = sc;
 		mPid = -1;
+		mRunButton = runButton;
+		mKillButton = killButton;
 	}
 
 	protected Boolean doInBackground(String... command) {
@@ -44,7 +47,6 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 			Method createSubprocess = execClass.getMethod("createSubprocess",
 			  String.class, String.class, String.class, int[].class);
 			mCreateSubprocess = createSubprocess;
-            mWaitFor = execClass.getMethod("waitFor", int.class);
 
 			// Executes the command.
 			// NOTE: createSubprocess() is asynchronous.
@@ -57,7 +59,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 			// Reads stdout.
 			// NOTE: You can write to stdin of the command using new FileOutputStream(fd).
 			FileInputStream in = new FileInputStream(fd);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in), 8096);
 
 			//Old-style, has obnoxious buffering behaviour, don't know why.
             //Process proc = Runtime.getRuntime().exec(command[0], null, dir);
@@ -67,6 +69,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 			while ((one_line = reader.readLine()) != null) {
 				publishProgress(one_line + "\n");
 			}
+			mPid = -1;
 		} catch (IOException e1) {
 			// Hacky: When the input fd is closed, instead of returning null from the next readLine()
 			// call, it seems that IOException is thrown.  So we ignore it.
@@ -88,18 +91,26 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	}
 
 	// Runs on UI thread
-	protected void killWget() {
-	    try {
-	    	mCreateSubprocess.invoke(null, "/system/bin/sh", "-c", "kill -2 " + mPid, null);
-			 
-			publishProgress("\n\nProcess " + mPid + " killed by user\n\n");
-		// If we catch an exception trying to run kill, don't worry about it much.
-		// Wget will die on its own, eventually (probably)
-	    } catch (IllegalArgumentException e) {
-		} catch (IllegalAccessException e) {
-		} catch (InvocationTargetException e) {
-		}
+	public boolean killWget() {
+	    Log.d("blah", "blah");
+		if (mPid != -1) {
+		    try {
+		    	mCreateSubprocess.invoke(null, "/system/bin/sh", "-c", "kill -2 " + mPid, null);
+				 
+				publishProgress("\nProcess " + mPid + " killed by user\n");
+			} catch (IllegalArgumentException e) {
+			} catch (IllegalAccessException e) {
+			} catch (InvocationTargetException e) {
+				// If we catch an exception trying to run kill, don't worry about it much.
+				// Wget will die on its own, eventually (probably)
+				return false;
+			}
+			return true;
+	    } else {
+	        return true;
+	    }
 	}
+	
 	protected void onProgressUpdate(String... progress) {
 		this.mLogTarget.append(progress[0]);
 		final ScrollView sc = this.mScroller;
@@ -112,7 +123,26 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
         }); 
     }
 
-	protected void onPostExecute(Integer result) {
-	}
+	protected void onPostExecute(Boolean result) {
+ 		onProgressUpdate("\nfinished\n");
+ 		showRunButton();
+    }
 
+    protected void onCancelled() {
+    	showRunButton();
+    }
+    
+    protected void onPreExecute() {
+    	showKillButton();
+    }
+    
+    protected void showRunButton() {
+	    mKillButton.setVisibility(View.INVISIBLE);
+	    mRunButton.setVisibility(View.VISIBLE);
+    }
+    
+    protected void showKillButton() {
+	    mKillButton.setVisibility(View.VISIBLE);
+	    mRunButton.setVisibility(View.INVISIBLE);
+    }
 }

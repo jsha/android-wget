@@ -57,10 +57,7 @@ public class Wget extends Activity {
 		kill.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (mWgetTask != null) {
-				  mWgetTask.killWget();
-				  kill.setVisibility(View.INVISIBLE);
-			      engage.setVisibility(View.VISIBLE);
-			        
+					mWgetTask.killWget();
 				}
 			}
 		});
@@ -122,8 +119,6 @@ public class Wget extends Activity {
 		
 		Button run = (Button) findViewById(R.id.engage);
 		Button kill = (Button) findViewById(R.id.kill);
-		run.setVisibility(View.INVISIBLE);
-        kill.setVisibility(View.VISIBLE);
         
 		// This is an AsyncTask that executes the wget binary and copies stdout into 'tv'.
 		mWgetTask = new WgetTask(tv, sv, run, kill);
@@ -135,23 +130,19 @@ public class Wget extends Activity {
 		String outFileName = base + "/" + filename;
 		File outFile = new File(outFileName);
 		if (!new File(outFileName).exists()) {
-			try {
-				Log.d("wget", "Extracting " + filename + " to " + outFileName);
-				InputStream is = this.getAssets().open(filename);
-				byte buf[] = new byte[1024];
-				int len;
-				OutputStream out = new FileOutputStream(outFile);
-				while ((len = is.read(buf)) > 0) {
-					out.write(buf, 0, len);
-				}
-				out.close();
-				is.close();
-				String[] cmd = { "/system/bin/chmod", "0755", outFileName };
-
-				Process proc = Runtime.getRuntime().exec(cmd);
-			} catch (IOException e) {
-				throw e;
+			Log.d("wget", "Extracting " + filename + " to " + outFileName);
+			InputStream is = this.getAssets().open(filename);
+			byte buf[] = new byte[1024];
+			int len;
+			OutputStream out = new FileOutputStream(outFile);
+			while ((len = is.read(buf)) > 0) {
+				out.write(buf, 0, len);
 			}
+			out.close();
+			is.close();
+			String[] cmd = { "/system/bin/chmod", "0755", outFileName };
+
+			Process proc = Runtime.getRuntime().exec(cmd);
 		}
 	}
 
