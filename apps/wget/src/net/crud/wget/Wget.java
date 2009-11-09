@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -93,6 +94,7 @@ public class Wget extends Activity {
 		String base = this.getApplicationContext().getFilesDir().getParent();
 		String wget = base + "/wget";
 
+		// Get the flags and URLs from the input fields, and save them for future use.
 		String options = ((EditText) findViewById(R.id.OptionsField)).getText()
 				.toString();
 		String url = ((EditText) findViewById(R.id.UrlField)).getText()
@@ -113,6 +115,9 @@ public class Wget extends Activity {
 		} catch (IOException e) {
 			tv.setText(e.toString());
 		}
+
+		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(tv.getWindowToken(), 0);
 
 		Button run = (Button) findViewById(R.id.engage);
 		Button kill = (Button) findViewById(R.id.kill);
