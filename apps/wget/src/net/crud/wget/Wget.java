@@ -88,6 +88,43 @@ public class Wget extends Activity {
 				startActivity(new Intent(Wget.this, WgetAbout.class));
 			}
 		});
+		
+		// If the Activity is killed for an orientation change while the wget binary
+		// is running, we pass the WgetTask object along.
+		WgetTask task = (WgetTask) getLastNonConfigurationInstance();
+		if (task != null) {
+			task.resume(this);
+			mWgetTask = task;
+			showKillButton();
+		} else {
+			showRunButton();
+		}
+	}
+	
+    
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		if (mWgetTask != null) {
+			mWgetTask.pause();
+			return mWgetTask;
+		}
+		return null;
+	}
+
+	public void addOutputLine(String line) {
+		TextView tv = (TextView) findViewById(R.id.output);
+		tv.append(line);
+		final ScrollView sc = (ScrollView) findViewById(R.id.scrollview);
+		// Put this on the UI thread queue so the text view re-renders before we
+		// try to scroll.
+		// Otherwise we fire too soon and there is no additional space to scroll
+		// to!
+		sc.post(new Runnable() {
+			public void run() {
+				sc.smoothScrollBy(0, 1000); // Arbitrary number greater than
+											// line height
+			}
+		});
 	}
 
 	public void runWget() {
@@ -108,8 +145,8 @@ public class Wget extends Activity {
 		String args = options + " " + url;
 
 		TextView tv = (TextView) findViewById(R.id.output);
-		ScrollView sv = (ScrollView) findViewById(R.id.scrollview);
-
+		tv.setText("");
+		
 		try {
 			this.copyBinary("wget");
 		} catch (IOException e) {
@@ -119,15 +156,28 @@ public class Wget extends Activity {
 		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(tv.getWindowToken(), 0);
 
-		Button run = (Button) findViewById(R.id.engage);
-		Button kill = (Button) findViewById(R.id.kill);
-
 		// This is an AsyncTask that executes the wget binary and copies stdout
 		// into 'tv'.
-		mWgetTask = new WgetTask(tv, sv, run, kill);
+		mWgetTask = new WgetTask(this);
 		mWgetTask.execute(wget + " " + args);
 	}
 
+	public void showRunButton() {
+		Button run = (Button) findViewById(R.id.engage);
+		Button kill = (Button) findViewById(R.id.kill);
+
+        kill.setVisibility(View.INVISIBLE);
+		run.setVisibility(View.VISIBLE);
+	}
+
+	public void showKillButton() {
+		Button run = (Button) findViewById(R.id.engage);
+		Button kill = (Button) findViewById(R.id.kill);
+
+        kill.setVisibility(View.VISIBLE);
+		run.setVisibility(View.INVISIBLE);
+	}
+	
 	private void copyBinary(String filename) throws IOException {
 		String base = this.getApplicationContext().getFilesDir().getParent();
 		String outFileName = base + "/" + filename;
@@ -149,4 +199,28 @@ public class Wget extends Activity {
 		}
 	}
 
+	public void onRestart() {
+		super.onRestart();
+		Log.d("wget", "onRestart");
+	}
+	public void onStart() {
+		super.onStart();
+		Log.d("wget", "onStart");
+	}
+	public void onResume() {
+		super.onRestart();
+		Log.d("wget", "onResume");
+	}
+	public void onPause() {
+		super.onPause();
+		Log.d("wget", "onPause");
+	}
+	public void onStop() {
+		super.onStop();
+		Log.d("wget", "onStop");
+	}
+	public void onDestroy() {
+		super.onDestroy();
+		Log.d("wget", "onDestroy");
+	}
 }

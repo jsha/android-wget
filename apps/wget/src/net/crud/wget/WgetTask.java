@@ -8,29 +8,52 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 public class WgetTask extends AsyncTask<String, String, Boolean> {
-	TextView mLogTarget;
-	ScrollView mScroller;
+	Wget parent;
 	int mPid;
 	Method mCreateSubprocess;
 	Button mRunButton;
 	Button mKillButton;
-
-	WgetTask(TextView tv, ScrollView sc, Button runButton, Button killButton) {
-		tv.setText("");
-		mLogTarget = tv;
-		mScroller = sc;
+    // These variables "belong" to the UI thread and should only be accessed from there.
+	// This stores all the text we've received so far
+	ArrayList<String> thusFar;
+	// This stores the lines that have arrived since pause() was called but before unpause() was called.
+    ArrayList<String> bufferedLines;
+    boolean isPaused;
+    
+	WgetTask(Wget p) {
+		parent = p;
 		mPid = -1;
-		mRunButton = runButton;
-		mKillButton = killButton;
+		isPaused = false;
+		bufferedLines = new ArrayList<String>();
+		thusFar = new ArrayList<String>();
+	}
+	
+	// Call from UI thread.
+	void pause() {
+	    isPaused = true;
+	}
+	
+	// Call from UI thread.
+	void resume(Wget activity) {
+	    isPaused = false;
+	    parent = activity;
+	    for (String line : thusFar) {
+	    	publishProgress(line);
+	    }
+	    while (bufferedLines.size() > 0) {
+	    	String line = bufferedLines.remove(0);
+	    	// We use publishProgress instead of directly adding to the buffer because
+	    	// potentially we could have a large number of lines and don't want to freeze
+	    	// the UI.
+	    	publishProgress(line);
+	    }
 	}
 
 	protected Boolean doInBackground(String... command) {
@@ -49,6 +72,8 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 					String.class, String.class, String.class, int[].class);
 			mCreateSubprocess = createSubprocess;
 
+			Method waitFor = execClass.getMethod("waitFor",	int.class);
+			
 			Log.d("wget", "Executing '" + command + "'");
 
 			// Executes the command.
@@ -77,6 +102,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 			while ((one_line = reader.readLine()) != null) {
 				publishProgress(one_line + "\n");
 			}
+			waitFor.invoke(null, mPid);
 			mPid = -1;
 		} catch (IOException e1) {
 			// Hacky: When the input fd is closed, instead of returning null
@@ -99,7 +125,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 		return true;
 	}
 
-	// Runs on UI thread
+	// Runs on UI thread, so keep it short
 	public boolean killWget() {
 		if (mPid != -1) {
 			try {
@@ -122,40 +148,26 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	}
 
 	protected void onProgressUpdate(String... progress) {
-		this.mLogTarget.append(progress[0]);
-		final ScrollView sc = this.mScroller;
-		// Put this on the UI thread queue so the text view re-renders before we
-		// try to scroll.
-		// Otherwise we fire too soon and there is no additional space to scroll
-		// to!
-		sc.post(new Runnable() {
-			public void run() {
-				sc.smoothScrollBy(0, 1000); // Arbitrary number greater than
-											// line height
-			}
-		});
+		String line = progress[0];
+		if (!this.isPaused) {
+			this.thusFar.add(line);
+			this.parent.addOutputLine(line);
+		} else {
+		    this.bufferedLines.add(line);
+		}
 	}
 
 	protected void onPostExecute(Boolean result) {
 		onProgressUpdate("\nfinished\n");
-		showRunButton();
+		parent.showRunButton();
 	}
 
 	protected void onCancelled() {
-		showRunButton();
+		parent.showRunButton();
 	}
 
 	protected void onPreExecute() {
-		showKillButton();
+		parent.showKillButton();
 	}
 
-	protected void showRunButton() {
-		mKillButton.setVisibility(View.INVISIBLE);
-		mRunButton.setVisibility(View.VISIBLE);
-	}
-
-	protected void showKillButton() {
-		mKillButton.setVisibility(View.VISIBLE);
-		mRunButton.setVisibility(View.INVISIBLE);
-	}
 }
