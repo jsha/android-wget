@@ -115,16 +115,22 @@ public class Wget extends Activity {
 		TextView tv = (TextView) findViewById(R.id.output);
 		tv.append(line);
 		final ScrollView sc = (ScrollView) findViewById(R.id.scrollview);
-		// Put this on the UI thread queue so the text view re-renders before we
-		// try to scroll.
-		// Otherwise we fire too soon and there is no additional space to scroll
-		// to!
-		sc.post(new Runnable() {
-			public void run() {
-				sc.smoothScrollBy(0, 1000); // Arbitrary number greater than
-											// line height
-			}
-		});
+		
+		// Don't scroll to the bottom if the user has scrolled back a ways to look at something.
+		// We should only auto scroll if the view is already at the bottom of the scrolling element		
+		if (sc.getScrollY() + sc.getHeight() >= tv.getHeight()) {
+			// Put this on the UI thread queue so the text view re-renders before we
+			// try to scroll.
+			// Otherwise we fire too soon and there is no additional space to scroll
+			// to!
+			sc.post(new Runnable() {
+				public void run() {
+					sc.smoothScrollBy(0, 1000); // Arbitrary number greater than
+					// line height
+				}
+			});
+		}
+	    
 	}
 
 	public void runWget() {
@@ -199,28 +205,28 @@ public class Wget extends Activity {
 		}
 	}
 
-	public void onRestart() {
-		super.onRestart();
-		Log.d("wget", "onRestart");
-	}
-	public void onStart() {
-		super.onStart();
-		Log.d("wget", "onStart");
-	}
-	public void onResume() {
-		super.onRestart();
-		Log.d("wget", "onResume");
-	}
-	public void onPause() {
-		super.onPause();
-		Log.d("wget", "onPause");
-	}
-	public void onStop() {
-		super.onStop();
-		Log.d("wget", "onStop");
-	}
-	public void onDestroy() {
-		super.onDestroy();
-		Log.d("wget", "onDestroy");
-	}
+//	public void onRestart() {
+//		super.onRestart();
+//		Log.d("wget", "onRestart");
+//	}
+//	public void onStart() {
+//		super.onStart();
+//		Log.d("wget", "onStart");
+//	}
+//	public void onResume() {
+//		super.onRestart();
+//		Log.d("wget", "onResume");
+//	}
+//	public void onPause() {
+//		super.onPause();
+//		Log.d("wget", "onPause");
+//	}
+//	public void onStop() {
+//		super.onStop();
+//		Log.d("wget", "onStop");
+//	}
+//	public void onDestroy() {
+//		super.onDestroy();
+//		Log.d("wget", "onDestroy");
+//	}
 }
