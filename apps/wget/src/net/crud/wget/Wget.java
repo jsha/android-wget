@@ -72,6 +72,15 @@ public class Wget extends Activity {
 						return true;
 					}
 				});
+		options_field
+			.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+				@Override
+				public boolean onEditorAction(TextView v, int actionId,
+						KeyEvent event) {
+					runWget();
+					return true;
+				}
+			});
 
 		Button help = (Button) findViewById(R.id.HelpButton);
 
@@ -125,8 +134,7 @@ public class Wget extends Activity {
 			// to!
 			sc.post(new Runnable() {
 				public void run() {
-					sc.smoothScrollBy(0, 1000); // Arbitrary number greater than
-					// line height
+					sc.smoothScrollBy(0, 1000); // Arbitrary number greater than line height
 				}
 			});
 		}
@@ -205,28 +213,28 @@ public class Wget extends Activity {
 		}
 	}
 
-//	public void onRestart() {
-//		super.onRestart();
-//		Log.d("wget", "onRestart");
-//	}
-//	public void onStart() {
-//		super.onStart();
-//		Log.d("wget", "onStart");
-//	}
-//	public void onResume() {
-//		super.onRestart();
-//		Log.d("wget", "onResume");
-//	}
-//	public void onPause() {
-//		super.onPause();
-//		Log.d("wget", "onPause");
-//	}
-//	public void onStop() {
-//		super.onStop();
-//		Log.d("wget", "onStop");
-//	}
-//	public void onDestroy() {
-//		super.onDestroy();
-//		Log.d("wget", "onDestroy");
-//	}
+	public void onRestart() {
+		super.onRestart();
+		Log.d("wget", "onRestart");
+	}
+	public void onStart() {
+		super.onStart();
+		Log.d("wget", "onStart");
+	}
+	public void onResume() {
+		super.onRestart();
+		Log.d("wget", "onResume");
+	}
+	public void onPause() {
+		super.onPause();
+		Log.d("wget", "onPause");
+	}
+	public void onStop() {
+		super.onStop();
+		Log.d("wget", "onStop");
+	}
+	public void onDestroy() {
+		super.onDestroy();
+		Log.d("wget", "onDestroy");
+	}
 }
