@@ -104,7 +104,11 @@ public class Wget extends Activity {
 		if (task != null) {
 			task.resume(this);
 			mWgetTask = task;
-			showKillButton();
+			if (mWgetTask.running()) {
+				showKillButton();
+			} else {
+				showRunButton();
+			}
 		} else {
 			showRunButton();
 		}
