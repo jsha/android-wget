@@ -132,7 +132,10 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	}
 
 	public void killWget() {
+		String report = "\nProcess " + mPid + " killed by user\n";
 		signalWget(2);  // SIGINT is generally sufficient
+		publishProgress(report);
+		
 	}
 	
 	// Runs on UI thread, so keep it short
@@ -143,9 +146,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 				Log.d("wget", "Running " + "exec kill -" + signal + " " + mPid);
 				mCreateSubprocess.invoke(null, "/system/bin/sh", "-c",
 						"exec kill -" + signal + " " + mPid, pids);
-				String report = "\nProcess " + mPid + " killed by user\n";
                 mWaitFor.invoke(null, pids[0]);
-				publishProgress(report);
 			} catch (IllegalArgumentException e) {
 			} catch (IllegalAccessException e) {
 			} catch (InvocationTargetException e) {
