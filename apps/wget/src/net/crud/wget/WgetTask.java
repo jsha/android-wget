@@ -144,8 +144,9 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 				int[] pids = new int[1]; 
 				mCreateSubprocess.invoke(null, "/system/bin/sh", "-c",
 						"exec kill -" + signal + " " + mPid, pids);
+				String report = "\nProcess " + mPid + " killed by user\n";
                 mWaitFor.invoke(null, pids[0]);
-				publishProgress("\nProcess " + mPid + " killed by user\n");
+				publishProgress(report);
 			} catch (IllegalArgumentException e) {
 			} catch (IllegalAccessException e) {
 			} catch (InvocationTargetException e) {
