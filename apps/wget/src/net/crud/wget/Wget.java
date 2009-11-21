@@ -97,28 +97,12 @@ public class Wget extends Activity {
 				startActivity(new Intent(Wget.this, WgetAbout.class));
 			}
 		});
-		
-		// If the Activity is killed for an orientation change while the wget binary
-		// is running, we pass the WgetTask object along.
-		WgetTask task = (WgetTask) getLastNonConfigurationInstance();
-		if (task != null) {
-			task.resume(this);
-			mWgetTask = task;
-			if (mWgetTask.running()) {
-				showKillButton();
-			} else {
-				showRunButton();
-			}
-		} else {
-			showRunButton();
-		}
 	}
 	
     
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		if (mWgetTask != null) {
-			mWgetTask.pause();
 			return mWgetTask;
 		}
 		return null;
@@ -227,14 +211,32 @@ public class Wget extends Activity {
 	}
 	public void onResume() {
 		super.onRestart();
+		
+		// If the Activity is killed for an orientation change while the wget binary
+		// is running, we pass the WgetTask object along.
+		WgetTask task = (WgetTask) getLastNonConfigurationInstance();
+		if (task != null) {
+			task.resume(this);
+			mWgetTask = task;
+			if (mWgetTask.running()) {
+				showKillButton();
+			} else {
+				showRunButton();
+			}
+		} else {
+			showRunButton();
+		}
+	
 		Log.d("wget", "onResume");
 	}
 	public void onPause() {
 		super.onPause();
+		mWgetTask.pause();
 		Log.d("wget", "onPause");
 	}
 	public void onStop() {
 		super.onStop();
+		mWgetTask.pause();
 		Log.d("wget", "onStop");
 	}
 	public void onDestroy() {

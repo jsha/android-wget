@@ -18,6 +18,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	Wget parent;
 	int mPid;
 	Method mCreateSubprocess;
+	Method mWaitFor;
 	Button mRunButton;
 	Button mKillButton;
     // These variables "belong" to the UI thread and should only be accessed from there.
@@ -37,11 +38,15 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	
 	// Call from UI thread.
 	void pause() {
+		// Pause the actual wget process so we don't get runaway crawls running unnoticed in the background, draining battery.
+		signalWget(19); // SIGSTOP
 	    isPaused = true;
 	}
 	
 	// Call from UI thread.
 	void resume(Wget activity) {
+		// Signal the wget process to resume
+		signalWget(18); // SIGCONT
 	    isPaused = false;
 	    parent = activity;
 	    for (String line : thusFar) {
@@ -60,13 +65,11 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 		// Inspired by
 		// http://remotedroid.net/blog/2009/04/13/running-native-code-in-android/
 		Class<?> execClass;
-		Method createSubprocess, waitFor;
 		try {
 			execClass = Class.forName("android.os.Exec");
-			createSubprocess = execClass.getMethod("createSubprocess",
+			mCreateSubprocess = execClass.getMethod("createSubprocess",
 				String.class, String.class, String.class, int[].class);
-			mCreateSubprocess = createSubprocess;
-			waitFor = execClass.getMethod("waitFor",	int.class);
+			mWaitFor = execClass.getMethod("waitFor",	int.class);
 
 			try {
 				String one_line;
@@ -84,7 +87,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 				// 'exec' is key here, otherwise killing this pid will only kill the
 				// shell, and wget will go background.
 				int[] pids = new int[1];
-				FileDescriptor fd = (FileDescriptor) createSubprocess.invoke(null,
+				FileDescriptor fd = (FileDescriptor) mCreateSubprocess.invoke(null,
 						"/system/bin/sh", "-c", "cd " + working_dir + "; exec "
 								+ command[0], pids);
 				mPid = pids[0];
@@ -111,7 +114,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 				// call, it seems that IOException is thrown. So we ignore it.
 			}
 			
-	        waitFor.invoke(null, mPid);
+	        mWaitFor.invoke(null, mPid);
 	        mPid = -1;
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e.getMessage());
@@ -130,14 +133,18 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 		return true;
 	}
 
-
-	// Runs on UI thread, so keep it short
 	public void killWget() {
+		signalWget(2);  // SIGINT is generally sufficient
+	}
+	
+	// Runs on UI thread, so keep it short
+	public void signalWget(int signal) {
 		if (mPid != -1) {
 			try {
+				int[] pids = new int[1]; 
 				mCreateSubprocess.invoke(null, "/system/bin/sh", "-c",
-						"kill -2 " + mPid, null);
-
+						"exec kill -" + signal + " " + mPid, pids);
+                mWaitFor.invoke(null, pids[0]);
 				publishProgress("\nProcess " + mPid + " killed by user\n");
 			} catch (IllegalArgumentException e) {
 			} catch (IllegalAccessException e) {
