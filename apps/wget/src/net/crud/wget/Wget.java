@@ -102,7 +102,6 @@ public class Wget extends Activity {
 		// is running, we pass the WgetTask object along.
 		WgetTask task = (WgetTask) getLastNonConfigurationInstance();
 		if (task != null) {
-			task.resume(this);
 			mWgetTask = task;
 			if (mWgetTask.running()) {
 				showKillButton();
@@ -227,14 +226,21 @@ public class Wget extends Activity {
 	}
 	public void onResume() {
 		super.onRestart();
+		if (mWgetTask != null) {
+			mWgetTask.resume(this);
+		}
 		Log.d("wget", "onResume");
 	}
 	public void onPause() {
 		super.onPause();
+		if (mWgetTask != null) {
+			mWgetTask.pause();
+		}
 		Log.d("wget", "onPause");
 	}
 	public void onStop() {
 		super.onStop();
+
 		Log.d("wget", "onStop");
 	}
 	public void onDestroy() {

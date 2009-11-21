@@ -23,7 +23,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	Button mKillButton;
     // These variables "belong" to the UI thread and should only be accessed from there.
 	// This stores all the text we've received so far
-	ArrayList<String> thusFar;
+	StringBuffer thusFar;
 	// This stores the lines that have arrived since pause() was called but before unpause() was called.
     ArrayList<String> bufferedLines;
     boolean isPaused;
@@ -33,7 +33,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 		mPid = -1;
 		isPaused = false;
 		bufferedLines = new ArrayList<String>();
-		thusFar = new ArrayList<String>();
+		thusFar = new StringBuffer();
 	}
 	
 	// Call from UI thread.
@@ -49,9 +49,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 		signalWget(18); // SIGCONT
 	    isPaused = false;
 	    parent = activity;
-	    for (String line : thusFar) {
-	    	publishProgress(line);
-	    }
+	    publishProgress(thusFar.toString());
 	    while (bufferedLines.size() > 0) {
 	    	String line = bufferedLines.remove(0);
 	    	// We use publishProgress instead of directly adding to the buffer because
@@ -141,7 +139,8 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	public void signalWget(int signal) {
 		if (mPid != -1) {
 			try {
-				int[] pids = new int[1]; 
+				int[] pids = new int[1];
+				Log.d("wget", "Running " + "exec kill -" + signal + " " + mPid);
 				mCreateSubprocess.invoke(null, "/system/bin/sh", "-c",
 						"exec kill -" + signal + " " + mPid, pids);
 				String report = "\nProcess " + mPid + " killed by user\n";
@@ -160,7 +159,7 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	protected void onProgressUpdate(String... progress) {
 		String line = progress[0];
 		if (!this.isPaused) {
-			this.thusFar.add(line);
+			this.thusFar.append(line);
 			this.parent.addOutputLine(line);
 		} else {
 		    this.bufferedLines.add(line);
