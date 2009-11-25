@@ -87,7 +87,6 @@ public class Wget extends Activity {
 		help.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				startActivity(new Intent(Wget.this, WgetHelp.class));
-
 			}
 		});
 
@@ -145,6 +144,12 @@ public class Wget extends Activity {
 	}
 
 	public void runWget() {
+		// Kill any existing wget process
+		if (mWgetTask != null) {
+			mWgetTask.killWget();
+			mWgetTask = null;
+		}
+		
 		String base = this.getApplicationContext().getFilesDir().getParent();
 		String wget = base + "/wget";
 
@@ -225,9 +230,13 @@ public class Wget extends Activity {
 		Log.d("wget", "onStart");
 	}
 	public void onResume() {
-		super.onRestart();
+		super.onResume();
+		TextView tv = (TextView) findViewById(R.id.output);
+        tv.setText("");
 		if (mWgetTask != null) {
 			mWgetTask.resume(this);
+			final ScrollView sc = (ScrollView) findViewById(R.id.scrollview);
+			sc.scrollBy(0, 10000000);
 		}
 		Log.d("wget", "onResume");
 	}

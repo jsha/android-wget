@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Button;
@@ -24,15 +22,12 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
     // These variables "belong" to the UI thread and should only be accessed from there.
 	// This stores all the text we've received so far
 	StringBuffer thusFar;
-	// This stores the lines that have arrived since pause() was called but before unpause() was called.
-    ArrayList<String> bufferedLines;
     boolean isPaused;
     
 	WgetTask(Wget p) {
 		parent = p;
 		mPid = -1;
 		isPaused = false;
-		bufferedLines = new ArrayList<String>();
 		thusFar = new StringBuffer();
 	}
 	
@@ -45,18 +40,11 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 	
 	// Call from UI thread.
 	void resume(Wget activity) {
-		// Signal the wget process to resume
-		signalWget(18); // SIGCONT
 	    isPaused = false;
 	    parent = activity;
 	    publishProgress(thusFar.toString());
-	    while (bufferedLines.size() > 0) {
-	    	String line = bufferedLines.remove(0);
-	    	// We use publishProgress instead of directly adding to the buffer because
-	    	// potentially we could have a large number of lines and don't want to freeze
-	    	// the UI.
-	    	publishProgress(line);
-	    }
+		// Signal the wget process to resume
+		signalWget(18); // SIGCONT
 	}
 
 	protected Boolean doInBackground(String... command) {
@@ -159,11 +147,9 @@ public class WgetTask extends AsyncTask<String, String, Boolean> {
 
 	protected void onProgressUpdate(String... progress) {
 		String line = progress[0];
+		this.thusFar.append(line);
 		if (!this.isPaused) {
-			this.thusFar.append(line);
 			this.parent.addOutputLine(line);
-		} else {
-		    this.bufferedLines.add(line);
 		}
 	}
 
